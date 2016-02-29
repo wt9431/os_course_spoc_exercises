@@ -95,8 +95,60 @@ Ntdetect。对于其他的操作系统，NTLDR装载并运行Bootsect.dos然后�
  
 ## 3.5 ucore系统调用分析
  1. ucore的系统调用中参数传递代码分析。
+ 
+在进入中断时，CPU已经将寄存器状态保存到栈上，在中断vector入口和__alltraps中，错误码和中断号、其他段寄存器也被保存到栈上，组成struct trapframe，该结构的指针被当作参数传递到trap()中，并保存到current中（因为syscall一定发生在用户态）。syscall的参数被保存在寄存器中，在syscall()中，这些参数从寄存器中读取到参数数组中（最多五个参数），并传递给syscall的真正执行函数。
+
+   void
+   syscall(void) {
+       struct trapframe *tf = current->tf;
+       uint32_t arg[5];
+       int num = tf->tf_regs.reg_eax;
+       if (num >= 0 && num < NUM_SYSCALLS) {
+           if (syscalls[num] != NULL) {
+               arg[0] = tf->tf_regs.reg_edx;
+               arg[1] = tf->tf_regs.reg_ecx;
+               arg[2] = tf->tf_regs.reg_ebx;
+               arg[3] = tf->tf_regs.reg_edi;
+               arg[4] = tf->tf_regs.reg_esi;
+               tf->tf_regs.reg_eax = syscalls[num](arg);
+               return ;
+           }
+       }
+       print_trapframe(tf);
+       panic("undefined syscall %d, pid = %d, name = %s.\n",
+               num, current->pid, current->name);
+   }
+
+
  1. 以getpid为例，分析ucore的系统调用中返回结果的传递代码。
+
+   sys_getpid()返回当前进程的进程号，返回值在syscall()中被赋值给eax在栈中的位置，在中断退出时，该值被弹入eax并返回给用户态程序。
+
  1. 以ucore lab8的answer为例，分析ucore 应用的系统调用编写和含义。
+ 
+  1. exit 结束当前进程
+  2. fork 创建子进程
+  3. wait 等待子进程结束
+  4. exec 在当前进程中加载其他可执行程序
+  5. yield 提前让出CPU时间
+  6. kill 给特定进程发送信号
+  7. getpid 返回当前进程的PID
+  8. putc 输出一个字符
+  9. pgdir 返回当前页目录地址
+  10. gettime 获得系统时间
+  11. lab6_set_priority 设置系统优先级
+  12. sleep 进程睡眠一段时间
+  13. open 打开一个文件
+  14. close 关闭一个文件
+  15. read 读取一个文件
+  16. write 向一个文件写入
+  17. seek 修改一个文件的访问偏移量
+  18. fstat 查询一个文件的信息
+  19. fsync 将所有缓存内容写回磁盘
+  20. getcwd 返回当前工作目录
+  21. getdirentry 获取文件描述符所对应目录的信息
+  22. dup 复制文件描述符
+ 
  1. 以ucore lab8的answer为例，尝试修改并运行ucore OS kernel代码，使其具有类似Linux应用工具`strace`的功能，即能够显示出应用程序发出的系统调用，从而可以分析ucore应用的系统调用执行过程。
  
 ## 3.6 请分析函数调用和系统调用的区别
