@@ -10,27 +10,27 @@
  1. 描述PXE的大致启动流程。
  
  - 1 通过UDP协议发送受限广播(255.255.255.255),目标端口67, 是DHCP命令中的DHCP discover,带PXEClient标志,并在UDP 68端口监听。
- - 2    DHCP服务器在67端口收到请求后,通过UDP协议发送受限广播(255.255.255.255)，目标端口68,是DHCP命令中的DHCPoffer,附带客户端ip,网关,tftp服务器ip,子网掩码,可引导的文件名等.
+ - 2 DHCP服务器在67端口收到请求后,通过UDP协议发送受限广播(255.255.255.255)，目标端口68,是DHCP命令中的DHCPoffer,附带客户端ip,网关,tftp服务器ip,子网掩码,可引导的文件名等.
  - 3 客户机在68端口收到服务器回复的信息,客户机配置自身ip，从此时起，客户机可以使用单播通讯了。
- - 4    客户端通过tftp协议发送获取引导文件的命令,并将获取的引导文件存放在地址 0:7c00 （第3步中获取的引导文件名）.
+ - 4 客户端通过tftp协议发送获取引导文件的命令,并将获取的引导文件存放在地址 0:7c00 （第3步中获取的引导文件名）.
  - 5.跳转到0:7c00开始执行引导文件中的代码,从此时起cpu控制权己交给引导文件.
     
 ## 3.2 系统启动流程
  1. 了解NTLDR的启动流程。
 
-  - 1、电源自检程序开始运行
-  - 2、主引导记录被装入内存，并且程序开始执行
-  - 3、活动分区的引导扇区被装入内存
-  - 4、NTLDR从引导扇区被装入并初始化
-  - 5、将处理器的实模式改为32位平滑内存模式
-  - 6、NTLDR开始运行适当的小文件系统驱动程序。小文件系统驱动程序是建立在NTLDR内部的，它能读FAT或NTFS。
-  - 7、NTLDR读boot.ini文件
-  - 8、NTLDR装载所选操作系统。如果windows NT/windows 2000/windows XP/windows server2003这些操作系统被选择，NTLDR运行
+ - 1 电源自检程序开始运行
+ - 2 主引导记录被装入内存，并且程序开始执行
+ - 3 活动分区的引导扇区被装入内存
+ - 4 NTLDR从引导扇区被装入并初始化
+ - 5 将处理器的实模式改为32位平滑内存模式
+ - 6 NTLDR开始运行适当的小文件系统驱动程序。小文件系统驱动程序是建立在NTLDR内部的，它能读FAT或NTFS。
+ - 7 NTLDR读boot.ini文件
+ - 8 NTLDR装载所选操作系统。如果windows NT/windows 2000/windows XP/windows server2003这些操作系统被选择，NTLDR运行
 Ntdetect。对于其他的操作系统，NTLDR装载并运行Bootsect.dos然后向它传递控制。windows NT过程结束。
-  - 9.Ntdetect搜索计算机硬件并将列表传送给NTLDR，以便将这些信息写进\\HKE Y_LOCAL_MACHINE\HARDWARE中。
-  - 10.然后NTLDR装载Ntoskrnl.exe，Hal.dll和系统信息集合。
-  - 11.Ntldr搜索系统信息集合，并装载设备驱动配置以便设备在启动时开始工作
-  - 12.Ntldr把控制权交给Ntoskrnl.exe，这时,启动程序结束,装载阶段开始
+ - 9 Ntdetect搜索计算机硬件并将列表传送给NTLDR，以便将这些信息写进\\HKE Y_LOCAL_MACHINE\HARDWARE中。
+ - 10 然后NTLDR装载Ntoskrnl.exe，Hal.dll和系统信息集合。
+ - 11 Ntldr搜索系统信息集合，并装载设备驱动配置以便设备在启动时开始工作
+ - 12 Ntldr把控制权交给Ntoskrnl.exe，这时,启动程序结束,装载阶段开始
     
  1. 了解GRUB的启动流程。
  
@@ -43,7 +43,7 @@ Ntdetect。对于其他的操作系统，NTLDR装载并运行Bootsect.dos然后�
  
  1. 比较NTLDR和GRUB的功能有差异。
  
- -  NTLDR是xp之前的windows系统的引导文件，只能装在硬盘
+ - NTLDR是xp之前的windows系统的引导文件，只能装在硬盘
  - GRUB是第三方操作系统引导器，可以引导硬盘、光盘、网络、u盘、winxp、winpe、win7、linux、dos....
     
  1. 了解u-boot的功能。
@@ -65,6 +65,7 @@ Ntdetect。对于其他的操作系统，NTLDR装载并运行Bootsect.dos然后�
  - linux的系统调用大概有250个，主要分为进程控制、文件操作、系统控制、内存管理、网络管理、用户管理、进程间通信这几类
  
  1. 以ucore lab8的answer为例，uCore的系统调用有哪些？大致的功能分类有哪些？(w2l1)
+ 
  - ucore的系统调用有22个，大致的功能分类有进程控制、文件操作、系统控制、内存管理、用户管理。
  
 ## 3.4 linux系统调用分析
@@ -75,6 +76,7 @@ Ntdetect。对于其他的操作系统，NTLDR装载并运行Bootsect.dos然后�
 
  
  1. 通过调试[lab1_ex1](https://github.com/chyyuu/ucore_lab/blob/master/related_info/lab1/lab1-ex1.md)了解Linux应用的系统调用执行过程。(w2l1)
+ 
  - strace可以跟踪到一个进程产生的系统调用,包括参数，返回值，执行消耗的时间。
  - 用户程序中执行系统调用，先通过调用C库中的函数，这个函数里面有软中断INT 0x80语句，这条指令的执行会让系统跳转到一个预设的内核空间地址，它指向系统调用处理程序，即system_call函数。INT 0x80指令执行时，系统调用号会被放入eax寄存器中，
  - system_call函数可以读取eax寄存器，然后将其乘以4,生成偏移地址，然后以sys_call_table为基址，基址加上偏移地址，就可以得到具体的系统调用服务例程的地址了。当系统调用完成后，把控制权交回到发起调用的用户进程前，内核会有一次调度。如果发现有优先级更高的进程或当前进程的时间片用完，那么会选择优先级更高的进程或重新选择进程执行。
